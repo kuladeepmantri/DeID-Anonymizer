@@ -25,7 +25,7 @@ Ensure you have the following installed:
 
 Clone the repository using the following command:
 
-https://github.com/kuladeepmantri/deid-anonymizer.git
+git clone https://github.com/kuladeepmantri/deid-anonymizer.git
 
 ### Installing Dependencies
 
