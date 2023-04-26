@@ -2,15 +2,13 @@
 
 DeID Anonymizer is a simple graphical tool to anonymize datasets using k-anonymity. The application is built using Python, PyQt5 for the user interface, and PySpark for processing the datasets.
 
-
 ## Features
 
-- Supports loading and saving datasets in CSV and JSON formats.
-- Allows users to choose which columns to anonymize and set an interval size for generalization.
-- Performs k-anonymity on the selected columns.
-- Hashes string columns to protect sensitive information.
-- Provides a simple and user-friendly interface.
-
+- Supports loading and saving datasets in CSV and JSON formats
+- Allows users to choose which columns to anonymize and set an interval size for generalization
+- Performs k-anonymity on the selected columns
+- Hashes string columns to protect sensitive information
+- Provides a simple and user-friendly interface
 
 ## Installation
 
@@ -37,7 +35,6 @@ cd DeID-Anonymizer
 
 pip install -r requirements.txt
 
-
 ## Usage
 
 1. Run the application:
@@ -46,11 +43,9 @@ python DeID.py
 
 2. Use the graphical interface to load your dataset, choose the columns to anonymize, set k value, and save the anonymized dataset.
 
-
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
 
 ## License
 
