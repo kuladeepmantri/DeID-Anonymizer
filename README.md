@@ -12,7 +12,7 @@ DeID Anonymizer is a simple graphical tool to anonymize datasets using k-anonymi
 
 ## Demo
 
-[Screencast from 2023-04-17 19-09-34.webm](https://user-images.githubusercontent.com/55834722/234714836-3ba34f71-9473-4a10-a481-3bcf45b63b40.webm)
+[Demo-Ubuntu](https://user-images.githubusercontent.com/55834722/234714836-3ba34f71-9473-4a10-a481-3bcf45b63b40.webm)
 
 
 ## Installation
