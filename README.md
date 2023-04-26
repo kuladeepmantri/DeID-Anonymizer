@@ -24,25 +24,25 @@ Ensure you have the following installed:
 Clone the repository using the following command:
 ```bash
 git clone https://github.com/kuladeepmantri/deid-anonymizer.git
-
+```
 ### Installing Dependencies
 
 1. Navigate to the project folder:
 ```bash
 cd DeID-Anonymizer
-
+```
 
 2. Install the required packages using the following command:
 ```bash
 pip install -r requirements.txt
-
+```
 
 ## Usage
 
 1. Run the application:
 ```bash
 python DeID.py
-
+```
 
 2. Use the graphical interface to load your dataset, choose the columns to anonymize, set k value, and save the anonymized dataset.
 
