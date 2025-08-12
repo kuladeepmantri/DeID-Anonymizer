@@ -1,63 +1,45 @@
-# DeID Anonymizer
+### De-identification & Data Privacy Platform (Enterprise)
 
-DeID Anonymizer is a simple graphical tool to anonymize datasets using k-anonymity. The application is built using Python, PyQt5 for the user interface, and PySpark for processing the datasets.
+FastAPI backend, Celery workers, React + Vite + MUI frontend, Redis, Postgres, and MinIO. Optimized for Apple Silicon (M1/M2/M3) with linux/arm64 images. Optional Metal acceleration on host for local AI when not using Docker.
 
-## Features
+#### Prereqs
+- Docker Desktop 4.30+ (Apple Silicon)
+- Node.js 20+
+- Python 3.12+ (optional for direct host runs)
 
-- Supports loading and saving datasets in CSV and JSON formats
-- Allows users to choose which columns to anonymize and set an interval size for generalization
-- Performs k-anonymity on the selected columns
-- Hashes string columns to protect sensitive information
-- Provides a simple and user-friendly interface
-
-## Demo
-
-[Demo-Ubuntu](https://user-images.githubusercontent.com/55834722/234714836-3ba34f71-9473-4a10-a481-3bcf45b63b40.webm)
-
-
-## Installation
-
-### Prerequisites
-
-Ensure you have the following installed:
-
-- Python 3.6 or later
-- Git
-
-### Cloning the Repository
-
-Clone the repository using the following command:
+#### Quickstart (Docker)
+- Copy `.env.example` to `.env` and adjust if needed
+- Start stack:
 ```bash
-git clone https://github.com/kuladeepmantri/deid-anonymizer.git
+docker compose -f deploy/docker-compose.yml --project-directory . up -d --build
 ```
-### Installing Dependencies
+- Backend: `http://localhost:8000/docs`
+- Frontend: `http://localhost:5173`
+- MinIO Console: `http://localhost:9001` (minioadmin/minioadmin)
 
-1. Navigate to the project folder:
+#### Apple Silicon Notes
+- Images are pinned to linux/arm64 and use slim/alpine bases
+- No GPU pass-through is required. AI runs CPU-first by default
+- For local host-run AI with Metal MPS (no Docker): set `ENABLE_METAL_ACCELERATION=true` and run backend via `make dev-backend-host`
+
+#### Makefile targets
 ```bash
-cd DeID-Anonymizer
+make init            # install frontend deps
+make up              # docker compose up (arm64)
+make down            # docker compose down -v
+make logs            # tail service logs
+make dev-backend     # run FastAPI via uvicorn in Docker
+make dev-frontend    # run Vite dev server
+make test            # backend tests
 ```
 
-2. Install the required packages using the following command:
-```bash
-pip install -r requirements.txt
-```
+#### Security & Compliance
+- JWT auth with RBAC
+- At-rest AES-256 via storage provider, TLS 1.3 in ingress (prod)
+- Audit logs with append-only table, exportable to external ledger
 
-## Usage
-
-1. Run the application:
-```bash
-python DeID.py
-```
-
-2. Use the graphical interface to load your dataset, choose the columns to anonymize, set k value, and save the anonymized dataset.
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
+#### License
+Proprietary. All rights reserved.
 
 
 
