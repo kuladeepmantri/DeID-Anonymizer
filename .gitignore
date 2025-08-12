@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.Python
+env/
+venv/
+.venv/
+.env
+.env.*
+.python-version
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.dist/
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# Node
+node_modules/
+.pnpm-store/
+.npm/
+.npmrc
+.yarn/
+.yarn-cache/
+.yarnrc
+.vite/
+.coverage/
+
+# Editors
+*.swp
+*.swo
+.DS_Store
+.idea/
+.vscode/
+
+# Logs
+*.log
+logs/
+
+# Docker
+**/.dockerignore
+**/Dockerfile*
+.docker/
+.docker-compose/
+
+# Misc
+*.sqlite3
+**/tmp/
+**/.cache/
+**/.pytest_cache/
+**/.next/
+
+# Frontend builds
+apps/frontend/dist/
+
+# Data
+/data/
+volumes/
