@@ -1,63 +1,104 @@
-# DeID Anonymizer
+### De-identification & Data Privacy Platform (Enterprise)
 
-DeID Anonymizer is a simple graphical tool to anonymize datasets using k-anonymity. The application is built using Python, PyQt5 for the user interface, and PySpark for processing the datasets.
+An enterprise-grade platform to detect and de-identify PII/PHI across structured and unstructured data with policy-driven controls, API access, auditability, and modern UI.
 
-## Features
+What it does (high level):
+- Detects sensitive data in text and files and applies masking/tokenization/anonymization according to policies
+- Supports uploads to object storage and batch background processing
+- Exposes REST APIs (and GraphQL optional) for programmatic use
+- Provides a clean React UI with drag-and-drop, dark mode, and real-time feedback
 
-- Supports loading and saving datasets in CSV and JSON formats
-- Allows users to choose which columns to anonymize and set an interval size for generalization
-- Performs k-anonymity on the selected columns
-- Hashes string columns to protect sensitive information
-- Provides a simple and user-friendly interface
+What’s included (stack):
+- Backend: FastAPI + Celery + Redis + Postgres + MinIO (S3-compatible)
+- Frontend: React + Vite + MUI
+- CI: Lint, tests, Docker build for linux/arm64 (Apple Silicon)
+- Apple Silicon: All images target linux/arm64; CPU-first AI by default
 
-## Demo
+### Quick Start for complete beginners (M3 MacBook Pro/Max)
 
-[Demo-Ubuntu](https://user-images.githubusercontent.com/55834722/234714836-3ba34f71-9473-4a10-a481-3bcf45b63b40.webm)
+0) Install prerequisites
+- Docker Desktop for Mac (Apple Silicon)
+- Node.js 20 (install via `nvm`, `fnm`, or NodeJS pkg)
+- Git (Xcode Command Line Tools or Homebrew)
 
-
-## Installation
-
-### Prerequisites
-
-Ensure you have the following installed:
-
-- Python 3.6 or later
-- Git
-
-### Cloning the Repository
-
-Clone the repository using the following command:
+1) Clone the repository and open Terminal
 ```bash
-git clone https://github.com/kuladeepmantri/deid-anonymizer.git
-```
-### Installing Dependencies
-
-1. Navigate to the project folder:
-```bash
-cd DeID-Anonymizer
+# In Terminal
+cd ~
+git clone <your-repo-url> deid-platform
+cd deid-platform
 ```
 
-2. Install the required packages using the following command:
+2) Create environment file
 ```bash
-pip install -r requirements.txt
+cp .env.example .env
 ```
 
-## Usage
-
-1. Run the application:
+3) One-command setup and run (recommended)
 ```bash
-python DeID.py
+bash scripts/setup.sh
 ```
+What it does:
+- Verifies Docker, Node, and Apple Silicon environment
+- Builds and starts the stack via docker compose
+- Waits until Postgres, Redis, MinIO, and the Backend are ready
+- Prints the service URLs and basic next steps
 
-2. Use the graphical interface to load your dataset, choose the columns to anonymize, set k value, and save the anonymized dataset.
+4) Open the app
+- Frontend: http://localhost:5173
+- Backend API docs: http://localhost:8000/docs
+- MinIO Console: http://localhost:9001 (user: minioadmin, pass: minioadmin)
 
-## Contributing
+5) Try de-identification
+- In the UI, paste text containing emails/phones and click Run
+- Or via API: `POST http://localhost:8000/deid/text` with `{ "text": "john.doe@example.com" }`
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+### Alternate run commands (manual)
+- Start: `docker compose -f deploy/docker-compose.yml --project-directory . up -d --build`
+- Stop: `docker compose -f deploy/docker-compose.yml --project-directory . down -v`
+- Logs: `make logs`
+- Tests: `make test`
+- Frontend dev only: `make dev-frontend`
+- Backend dev only: `make dev-backend`
+- Backend on host (optional Metal AI later): `ENABLE_METAL_ACCELERATION=true make dev-backend-host`
 
-## License
+### Troubleshooting (run this first)
+```bash
+bash scripts/debug.sh
+```
+This will:
+- Check Docker is running, arch is arm64, and ports are free
+- Show container status and last logs
+- Probe health endpoints (backend, Postgres, Redis, MinIO)
+- Attempt simple API calls to verify routing
 
-[MIT](https://choosealicense.com/licenses/mit/)
+If Docker isn’t found, install/restart Docker Desktop and re-run `scripts/setup.sh`.
+
+### Common issues on M3 Macs
+- Docker build stuck or slow: ensure Docker Desktop has adequate CPU/RAM in Settings > Resources
+- Port in use (5173, 8000, 9000, 9001, 5432, 6379): stop any app using those ports or change them in `.env`/compose
+- MinIO bucket not found: the stack includes an init job (`createbuckets`) that creates the bucket; re-run `docker compose up -d`
+
+### Security & Compliance (baseline)
+- JWT auth scaffold and RBAC-ready structure
+- AES-256 at rest via storage provider; TLS 1.3 in ingress (prod)
+- Append-only audit trail planned; exportable to external ledger
+- SSO/OIDC placeholders in `.env` for future wiring
+
+### Roadmap options
+- AI-driven NER (spaCy/Presidio) behind a feature flag
+- Policy authoring assistant and rule suggestions
+- Distributed batch processing (Spark) for massive datasets
+- Helm charts for Kubernetes deployment and GitOps CD
+
+### Development
+- Backend code: `apps/backend/app`
+- Frontend code: `apps/frontend/src`
+- Compose stack: `deploy/docker-compose.yml`
+- CI: `.github/workflows/ci.yml`
+
+### License
+Proprietary. All rights reserved.
 
 
 
