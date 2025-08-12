@@ -44,8 +44,7 @@ node_modules/
 logs/
 
 # Docker
-**/.dockerignore
-**/Dockerfile*
+# Keep Dockerfiles and .dockerignore in Git
 .docker/
 .docker-compose/
 

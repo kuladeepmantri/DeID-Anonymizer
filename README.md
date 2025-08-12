@@ -1,44 +1,103 @@
 ### De-identification & Data Privacy Platform (Enterprise)
 
-FastAPI backend, Celery workers, React + Vite + MUI frontend, Redis, Postgres, and MinIO. Optimized for Apple Silicon (M1/M2/M3) with linux/arm64 images. Optional Metal acceleration on host for local AI when not using Docker.
+An enterprise-grade platform to detect and de-identify PII/PHI across structured and unstructured data with policy-driven controls, API access, auditability, and modern UI.
 
-#### Prereqs
-- Docker Desktop 4.30+ (Apple Silicon)
-- Node.js 20+
-- Python 3.12+ (optional for direct host runs)
+What it does (high level):
+- Detects sensitive data in text and files and applies masking/tokenization/anonymization according to policies
+- Supports uploads to object storage and batch background processing
+- Exposes REST APIs (and GraphQL optional) for programmatic use
+- Provides a clean React UI with drag-and-drop, dark mode, and real-time feedback
 
-#### Quickstart (Docker)
-- Copy `.env.example` to `.env` and adjust if needed
-- Start stack:
+What’s included (stack):
+- Backend: FastAPI + Celery + Redis + Postgres + MinIO (S3-compatible)
+- Frontend: React + Vite + MUI
+- CI: Lint, tests, Docker build for linux/arm64 (Apple Silicon)
+- Apple Silicon: All images target linux/arm64; CPU-first AI by default
+
+### Quick Start for complete beginners (M3 MacBook Pro/Max)
+
+0) Install prerequisites
+- Docker Desktop for Mac (Apple Silicon)
+- Node.js 20 (install via `nvm`, `fnm`, or NodeJS pkg)
+- Git (Xcode Command Line Tools or Homebrew)
+
+1) Clone the repository and open Terminal
 ```bash
-docker compose -f deploy/docker-compose.yml --project-directory . up -d --build
-```
-- Backend: `http://localhost:8000/docs`
-- Frontend: `http://localhost:5173`
-- MinIO Console: `http://localhost:9001` (minioadmin/minioadmin)
-
-#### Apple Silicon Notes
-- Images are pinned to linux/arm64 and use slim/alpine bases
-- No GPU pass-through is required. AI runs CPU-first by default
-- For local host-run AI with Metal MPS (no Docker): set `ENABLE_METAL_ACCELERATION=true` and run backend via `make dev-backend-host`
-
-#### Makefile targets
-```bash
-make init            # install frontend deps
-make up              # docker compose up (arm64)
-make down            # docker compose down -v
-make logs            # tail service logs
-make dev-backend     # run FastAPI via uvicorn in Docker
-make dev-frontend    # run Vite dev server
-make test            # backend tests
+# In Terminal
+cd ~
+git clone <your-repo-url> deid-platform
+cd deid-platform
 ```
 
-#### Security & Compliance
-- JWT auth with RBAC
-- At-rest AES-256 via storage provider, TLS 1.3 in ingress (prod)
-- Audit logs with append-only table, exportable to external ledger
+2) Create environment file
+```bash
+cp .env.example .env
+```
 
-#### License
+3) One-command setup and run (recommended)
+```bash
+bash scripts/setup.sh
+```
+What it does:
+- Verifies Docker, Node, and Apple Silicon environment
+- Builds and starts the stack via docker compose
+- Waits until Postgres, Redis, MinIO, and the Backend are ready
+- Prints the service URLs and basic next steps
+
+4) Open the app
+- Frontend: http://localhost:5173
+- Backend API docs: http://localhost:8000/docs
+- MinIO Console: http://localhost:9001 (user: minioadmin, pass: minioadmin)
+
+5) Try de-identification
+- In the UI, paste text containing emails/phones and click Run
+- Or via API: `POST http://localhost:8000/deid/text` with `{ "text": "john.doe@example.com" }`
+
+### Alternate run commands (manual)
+- Start: `docker compose -f deploy/docker-compose.yml --project-directory . up -d --build`
+- Stop: `docker compose -f deploy/docker-compose.yml --project-directory . down -v`
+- Logs: `make logs`
+- Tests: `make test`
+- Frontend dev only: `make dev-frontend`
+- Backend dev only: `make dev-backend`
+- Backend on host (optional Metal AI later): `ENABLE_METAL_ACCELERATION=true make dev-backend-host`
+
+### Troubleshooting (run this first)
+```bash
+bash scripts/debug.sh
+```
+This will:
+- Check Docker is running, arch is arm64, and ports are free
+- Show container status and last logs
+- Probe health endpoints (backend, Postgres, Redis, MinIO)
+- Attempt simple API calls to verify routing
+
+If Docker isn’t found, install/restart Docker Desktop and re-run `scripts/setup.sh`.
+
+### Common issues on M3 Macs
+- Docker build stuck or slow: ensure Docker Desktop has adequate CPU/RAM in Settings > Resources
+- Port in use (5173, 8000, 9000, 9001, 5432, 6379): stop any app using those ports or change them in `.env`/compose
+- MinIO bucket not found: the stack includes an init job (`createbuckets`) that creates the bucket; re-run `docker compose up -d`
+
+### Security & Compliance (baseline)
+- JWT auth scaffold and RBAC-ready structure
+- AES-256 at rest via storage provider; TLS 1.3 in ingress (prod)
+- Append-only audit trail planned; exportable to external ledger
+- SSO/OIDC placeholders in `.env` for future wiring
+
+### Roadmap options
+- AI-driven NER (spaCy/Presidio) behind a feature flag
+- Policy authoring assistant and rule suggestions
+- Distributed batch processing (Spark) for massive datasets
+- Helm charts for Kubernetes deployment and GitOps CD
+
+### Development
+- Backend code: `apps/backend/app`
+- Frontend code: `apps/frontend/src`
+- Compose stack: `deploy/docker-compose.yml`
+- CI: `.github/workflows/ci.yml`
+
+### License
 Proprietary. All rights reserved.
 
 

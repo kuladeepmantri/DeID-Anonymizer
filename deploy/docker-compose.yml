@@ -16,10 +16,10 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 20
 
   redis:
     image: redis:7-alpine
@@ -29,6 +29,11 @@ services:
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   minio:
     image: quay.io/minio/minio:RELEASE.2025-01-04T00-00-00Z
@@ -42,16 +47,22 @@ services:
       - "9001:9001"
     volumes:
       - minio:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   createbuckets:
     image: minio/mc:RELEASE.2025-01-04T00-00-00Z
     platform: linux/arm64
     depends_on:
-      - minio
+      minio:
+        condition: service_healthy
     entrypoint: >-
       /bin/sh -c "
-      until (/usr/bin/mc alias set local http://minio:9000 ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY}); do echo 'Waiting for MinIO...' && sleep 2; done; 
-      /usr/bin/mc mb -p local/${S3_BUCKET}; 
+      /usr/bin/mc alias set local http://minio:9000 ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY}; 
+      /usr/bin/mc mb -p local/${S3_BUCKET} || true; 
       /usr/bin/mc anonymous set download local/${S3_BUCKET}; 
       exit 0;"
 
@@ -79,12 +90,22 @@ services:
       - ENABLE_GRAPHQL=${ENABLE_GRAPHQL}
       - ENABLE_AUDIT_LEDGER=${ENABLE_AUDIT_LEDGER}
     depends_on:
-      - postgres
-      - redis
-      - minio
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      createbuckets:
+        condition: service_completed_successfully
     ports:
       - "8000:8000"
     command: ["bash", "-lc", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
 
   worker:
     build:
@@ -95,8 +116,10 @@ services:
     env_file:
       - ../.env
     depends_on:
-      - backend
-      - redis
+      backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     command: ["celery", "-A", "app.worker.celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
 
   frontend:
@@ -108,7 +131,8 @@ services:
     env_file:
       - ../.env
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "5173:5173"
     command: ["bash", "-lc", "npm run dev -- --host 0.0.0.0 --port 5173"]
