@@ -28,10 +28,46 @@ if ! docker info >/dev/null 2>&1; then
   exit 1
 fi
 
-# Copy env if missing
+# Copy or generate env if missing
 if [[ ! -f .env ]]; then
-  info "Creating .env from .env.example"
-  cp .env.example .env
+  if [[ -f .env.example ]]; then
+    info "Creating .env from .env.example"
+    cp .env.example .env
+  else
+    info ".env.example not found. Generating default .env"
+    cat > .env <<'EOF'
+APP_ENV=development
+SECRET_KEY=changeme-super-secret
+JWT_ALGORITHM=HS256
+API_BASE_URL=http://localhost:8000
+FRONTEND_BASE_URL=http://localhost:5173
+ALLOWED_ORIGINS=http://localhost:5173
+POSTGRES_DB=deid
+POSTGRES_USER=deid_user
+POSTGRES_PASSWORD=deid_password
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+DATABASE_URL=postgresql+asyncpg://deid_user:deid_password@postgres:5432/deid
+REDIS_URL=redis://redis:6379/0
+CELERY_BROKER_URL=redis://redis:6379/1
+CELERY_RESULT_BACKEND=redis://redis:6379/2
+STORAGE_BACKEND=s3
+S3_ENDPOINT_URL=http://minio:9000
+S3_REGION=us-east-1
+S3_BUCKET=deid-bucket
+AWS_ACCESS_KEY_ID=minioadmin
+AWS_SECRET_ACCESS_KEY=minioadmin
+OIDC_PROVIDER_URL=
+OIDC_CLIENT_ID=
+OIDC_CLIENT_SECRET=
+OIDC_REDIRECT_URI=http://localhost:8000/auth/callback
+ENABLE_GRAPHQL=true
+ENABLE_AUDIT_LEDGER=true
+ENABLE_OCR=true
+ENABLE_AI_DETECTION=true
+ENABLE_METAL_ACCELERATION=false
+EOF
+  fi
 fi
 
 # Build and start
